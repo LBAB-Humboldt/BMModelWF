@@ -6,6 +6,7 @@
 #
 #Args:
 # sp.raster = character string with tif filename (including extension)
+# name = character string with species name. Will be used to construct 
 # in.folder = folder that contains the .tif file to convert
 # col.pal = color palette to be used in resulting maps
 # add.trans = add trasparent color to palette? Usually you would use TRUE when the tif file
@@ -14,26 +15,28 @@
 # params = list with elements dem, corresponding to a raster with elevation to be displayed in
 #  the background of thumbnails, and shape, corresponding to a SpatialPolygonsDataFrame with 
 #  administrative boundaries to be displayed in thumbnail.
+# w = the width of the PNG thumbnail
+# h = the heigth of the PNG thumbnail
 #
 #Usage:
 #   in.folder = "~/Modelos/librorojo2"
 #   col.pal = rgb(193,140,40,maxColorValue=255)
 #   sp.raster = "Anas_bahamensis_0.tif"
-#   convert2PNG(sp.raster, in.folder, col.pal, TRUE, params=params)
+#   name = "Anas_bahamensis_0"
+#   convert2PNG(sp.raster, in.folder, col.pal, TRUE, params=params, 145, 205)
 #
 #Example on parallel loop
-# require(snowfall)
-# sfInit(parallel=T,cpus=16)#Initialize nodes
-# sfExportAll() #Export vars to all the nodes
-# sfClusterSetupRNG()
-# sfClusterApplyLB(sp.list, convert2PNG, in.folder=in.folder, 
-# col.pal=col.pal, add.trans=TRUE, params=params)
-# sfStop()
-#
+#require(snowfall)
+#sfInit(parallel=T,cpus=15)#Initialize nodes
+#sfExport(list=c("sp.list","names","wd","params","convert2PNG","col.pal")) #Export vars to all the nodes
+#sfClusterApplyLB(1:length(sp.list), function(i){
+#  convert2PNG(ap.list[i], names[i],in.folder=wd,col.pal=col.pal,add.trans=TRUE, 
+#              params=params,w=145,h=205)}) #Thumbnail sizes for v1. For v2: 179, 220
+#sfStop()
 #Author: Jorge Velasquez
-#Date created: 05-09-2014
+#Last modified: 14-02-2016
 
-convert2PNG<-function(sp.raster, name,in.folder, col.pal, add.trans, params,w,h){
+convert2PNG<-function(sp.raster, name, in.folder, col.pal, add.trans, params,w,h){
   require(raster)
   require(sp)
   require(rgdal)
