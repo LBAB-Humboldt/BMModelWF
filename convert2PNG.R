@@ -34,6 +34,7 @@
 #              params=params,w=145,h=205)}) #Thumbnail sizes for v1. For v2: 179, 220
 #sfStop()
 #Author: Jorge Velasquez
+#Date created: 05-09-2014
 #Last modified: 14-02-2016
 
 convert2PNG<-function(sp.raster, name, in.folder, col.pal, add.trans, params,w,h){
