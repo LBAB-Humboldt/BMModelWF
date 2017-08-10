@@ -190,13 +190,13 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
       writeRaster(ch.map, paste0(wd, "/",  out.sp.name, "_ch.tif"), format="GTiff", overwrite=TRUE, NAflag=-9999)
       
       results.template <- initial.template
-      results.template[1, c("acceptedNameUsage", "modelingMethod", "validationType",
+      results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod", "validationType",
                             "perfStatType", "perfStatValue", "perfStatSD", "pValue",
                             "recsUsed","consensusMethod","thresholdValue", "omission",
                             "modelLevel", "modelStatus","tifPath", "dd", "mm", "yyyy")] <-
-        c(sp.name, "ch", "jackniffe", "TSS.test", mean(ch.eval$tss, na.rm=T),
+        c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "ch", "jackniffe", "TSS.test", mean(ch.eval$tss, na.rm=T),
           sd(ch.eval$tss, na.rm=T), PoolPValues(ch.eval$p.value), nrow(sp.occs), "all",
-          NA,omission, 1, "developing",paste0(wd, "/",  sub(" ","_",sp.name), "_ch.tif"),
+          NA,omission, 1, "Developing",paste0(sub(" ","_",sp.name), "_ch.tif"),
           format(Sys.Date(),"%d"), format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
       write.csv(results.template, paste0(wd, "/",  out.sp.name, "_modelResults.csv"), row.names=FALSE)
       WriteCSV(sp.occs, paste0(wd, "/",  out.sp.name,".csv"),as.is)
@@ -213,13 +213,13 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
       #Write Results
       writeRaster(bc.map, paste0(wd, "/",  out.sp.name, "_bc.tif"), format="GTiff", overwrite=TRUE, NAflag=-9999)
       results.template <- initial.template
-      results.template[1, c("acceptedNameUsage", "modelingMethod", "validationType",
+      results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod", "validationType",
                             "perfStatType", "perfStatValue", "perfStatSD", "pValue",
                             "recsUsed", "consensusMethod","thresholdValue", "omission",
                             "modelLevel", "modelStatus","tifPath", "dd", "mm", "yyyy")] <-
-        c(sp.name, "bc", "jackniffe", "AUC.test", mean(bc.eval$test.auc, na.rm=T),
+        c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "bc", "jackniffe", "AUC.test", mean(bc.eval$test.auc, na.rm=T),
           sd(bc.eval$test.auc, na.rm=T), PoolPValues(bc.eval$p.value), nrow(sp.occs),
-          "all", NA, "NA",1, "developing", paste0(wd, "/",  sub(" ","_",sp.name), "_bc.tif"), format(Sys.Date(),"%d"),
+          "all", NA, "NA",1, "Developing", paste0(sub(" ","_",sp.name), "_bc.tif"), format(Sys.Date(),"%d"),
           format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
       write.csv(results.template, paste0(wd, "/",  out.sp.name, "_modelResults.csv"), row.names=FALSE)
       WriteCSV(sp.occs, paste0(wd, "/",  out.sp.name,".csv"),as.is)
@@ -238,13 +238,13 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
                       format="GTiff",overwrite=TRUE, NAflag=-9999)
           results.template <- initial.template
           thresholds <- quantile(predict(bc.obj, occs.covs[sp.idx, ]),raw.threshold[j] / 100)
-          results.template[1, c("acceptedNameUsage", "modelingMethod","thresholdType", "validationType",
+          results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod","thresholdType", "validationType",
                                 "perfStatType", "perfStatValue", "perfStatSD", "pValue",
                                 "recsUsed", "consensusMethod","thresholdValue", "omission",
                                 "modelLevel", "modelStatus","tifPath", "dd", "mm", "yyyy")] <-
-            c(sp.name, "bc", raw.threshold[j],"jackniffe", "TSS.test", mean(bc.eval.t$tss),
+            c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "bc", raw.threshold[j],"jackniffe", "TSS.test", mean(bc.eval.t$tss),
               sd(bc.eval.t$tss), PoolPValues(bc.eval.t$p.value), nrow(sp.occs),
-              "all", thresholds[j], (1-mean(bc.eval.t$sens)), 1, "developing", paste0(wd, "/",  sub(" ","_",sp.name), "_", raw.threshold[j], "_bc.tif"),
+              "all", thresholds[j], (1-mean(bc.eval.t$sens)), 1, "Developing", paste0(sub(" ","_",sp.name), "_", raw.threshold[j], "_bc.tif"),
               format(Sys.Date(),"%d"), format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
           write.csv(results.template, paste0(wd, "/",  out.sp.name, "_", raw.threshold[j], "_modelResults.csv"), row.names=FALSE)
         }
@@ -256,7 +256,11 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
     if(occ.summary$modelType[i] == "mx"){
       sp.idx <- which(occs[, sp.col] == sp.name)
       sp.occs <- occs[sp.idx, ]
-      bkg.coords <- randomPoints(bias.raster, n.bkg, prob=T)
+      if(is.null(bias.raster)){
+        bkg.coords <- randomPoints(env.vars, n.bkg, prob=F)
+      } else {
+        bkg.coords <- randomPoints(bias.raster, n.bkg, prob=T)
+      }
       bkg.covs <- extract(env.vars, bkg.coords)
       enmeval.obj <- ENMevaluate(with(sp.occs,cbind(lon,lat)), env.vars, bkg.coords, RMvalues = seq(0.5, 4, 0.5),
                             fc = c("L", "LQ", "LQH"), method = "checkerboard1",
@@ -272,16 +276,16 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
       writeRaster(mx.map, paste0(wd, "/",  out.sp.name, "_mx.tif"), format="GTiff", overwrite=TRUE, NAflag=-9999)
       best.ind<-which.max(enmeval.obj@results$Mean.AUC)
       results.template <- initial.template
-      results.template[1, c("acceptedNameUsage", "modelingMethod", "validationType",
+      results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod", "validationType",
                             "perfStatType", "perfStatValue", "perfStatSD", "pValue",
                             "recsUsed", "consensusMethod","thresholdValue", "omission",
                             "modelLevel", "modelStatus","tifPath", "dd", "mm", "yyyy")] <-
-        c(sp.name, "mx", "checkerboard1", "AUC.test", enmeval.obj@results$Mean.AUC[best.ind],
+        c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "mx", "checkerboard1", "AUC.test", enmeval.obj@results$Mean.AUC[best.ind],
           sqrt(enmeval.obj@results$Var.AUC[best.ind]), NA, nrow(sp.occs),
-          "all", NA, "NA",1, "developing", paste0(wd, "/",  sub(" ","_",sp.name), "_mx.tif"), 
+          "all", NA, "NA",1, "Developing", paste0(sub(" ","_",sp.name), "_mx.tif"), 
           format(Sys.Date(),"%d"), format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
       write.csv(results.template, paste0(wd, "/",  out.sp.name, "_modelResults.csv"), row.names=FALSE)
-      WriteCSV(sp.occs, paste0(wd, "/",  out.sp.name,".csv"),as.is)
+      WriteCSV(sp.occs, paste0(wd, "/",  out.sp.name,".csv"),as.is=T)
       save(enmeval.obj, file=paste0(wd, "/", out.sp.name, "_enmeval.RData"))
       save(mx.obj, file=paste0(wd, "/", out.sp.name, ".RData"))
       cat(paste(Sys.time(), "Generated Maxent distribution model for", sp.name, "\n"))
@@ -296,13 +300,13 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
                       format="GTiff",overwrite=TRUE, NAflag=-9999)
           results.template <- initial.template
           thresholds <- quantile(predict(mx.obj, occs.covs[sp.idx, ]),raw.threshold[j] / 100)
-          results.template[1, c("acceptedNameUsage", "modelingMethod","thresholdType", "validationType",
+          results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod","thresholdType", "validationType",
                                 "perfStatType", "perfStatValue", "perfStatSD", "pValue",
                                 "recsUsed", "consensusMethod","thresholdValue", "omission",
                                 "modelLevel", "modelStatus","tifPath", "dd", "mm", "yyyy")] <-
-            c(sp.name, "mx", raw.threshold[j],"k-fold", "TSS.test", mean(mx.eval.t$tss),
+            c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "mx", raw.threshold[j],"k-fold", "TSS.test", mean(mx.eval.t$tss),
               sd(mx.eval.t$tss), PoolPValues(mx.eval.t$p.value), nrow(sp.occs),
-              "all", thresholds[j], (1-mean(mx.eval.t$sens)), 1, "developing", paste0(wd, "/",  sub(" ","_",sp.name),"_" ,raw.threshold[j], "_mx.tif"),
+              "all", thresholds[j], (1-mean(mx.eval.t$sens)), 1, "Developing", paste0(sub(" ","_",sp.name),"_" ,raw.threshold[j], "_mx.tif"),
               format(Sys.Date(),"%d"), format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
           write.csv(results.template, paste0(wd, "/",  out.sp.name, "_", raw.threshold[j], "_modelResults.csv"), row.names=FALSE)
         }
