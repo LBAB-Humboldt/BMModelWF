@@ -97,8 +97,9 @@
 # buffer<-150000
 # proj.crs<-"+proj=utm +zone=18 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 # n.cpu<-15
+# as.is=T
 bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.bkg, bias.raster, 
-               mxnt.args, do.treshold, raw.threshold, folds,buffer,proj.crs,ncpu,as.is){  
+               mxnt.args, do.treshold, raw.threshold, folds,buffer,proj.crs,ncpu,as.is,prefix){  
   #Create log file
   sink(paste0(wd,"/log.txt"))
   on.exit(sink())
@@ -285,7 +286,7 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
           "all", NA, "NA",1, "Developing", paste0(sub(" ","_",sp.name), "_mx.tif"), 
           format(Sys.Date(),"%d"), format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
       write.csv(results.template, paste0(wd, "/",  out.sp.name, "_modelResults.csv"), row.names=FALSE)
-      WriteCSV(sp.occs, paste0(wd, "/",  out.sp.name,".csv"),as.is=T)
+      WriteCSV(sp.occs, paste0(wd, "/",  out.sp.name,".csv"),as.is)
       save(enmeval.obj, file=paste0(wd, "/", out.sp.name, "_enmeval.RData"))
       save(mx.obj, file=paste0(wd, "/", out.sp.name, ".RData"))
       cat(paste(Sys.time(), "Generated Maxent distribution model for", sp.name, "\n"))
