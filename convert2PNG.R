@@ -37,15 +37,15 @@
 #Date created: 05-09-2014
 #Last modified: 14-02-2016
 
-convert2PNG<-function(sp.raster, name, in.folder, col.pal, add.trans, params,w,h){
+convert2PNG<-function(sp.raster, name, in.folder, out.folder, col.pal, add.trans, params,w,h){
   require(raster)
   require(sp)
   require(rgdal)
   
   #Create dirs
-  dir.create(paste0(in.folder,"/PNG"), recursive=T)
-  dir.create(paste0(in.folder,"/KMZ"), recursive=T)
-  dir.create(paste0(in.folder,"/thumb"), recursive=T)
+  dir.create(paste0(out.folder,"/PNG"), recursive=T)
+  dir.create(paste0(out.folder,"/KMZ"), recursive=T)
+  dir.create(paste0(out.folder,"/thumb"), recursive=T)
   
   #Plots for geovisor
   if(class(sp.raster)=="RasterLayer"){
@@ -56,7 +56,7 @@ convert2PNG<-function(sp.raster, name, in.folder, col.pal, add.trans, params,w,h
       projection(in.raster)<-"+proj=longlat +ellps=WGS84 +datum=WGS84"
     }
   }
-    
+  
   #Remove colors if not enough categories
   # freq.cat <- freq(in.raster)
   # ind <- freq.cat[which(freq.cat[, 1]>0)]
@@ -65,19 +65,19 @@ convert2PNG<-function(sp.raster, name, in.folder, col.pal, add.trans, params,w,h
   if(add.trans){
     col.pal <- c(tr, col.pal)
   }
-
+  
   #Create KML
   if(is.null(name)){
     name <- strsplit(sp.raster,"[.]")[[1]][1]
   }
-  KML(in.raster, filename=paste0(in.folder,"/KMZ/",name,".kmz"),
+  KML(in.raster, filename=paste0(out.folder,"/KMZ/",name,".kmz"),
       maxpixels=ncell(in.raster), col=col.pal, overwrite=T, blur=1)
-  unzip(paste0(in.folder, "/KMZ/", name, ".kmz"), exdir=paste0(in.folder,"/PNG"))
-  file.remove(paste0(in.folder, "/PNG/", name,".kml"))
+  unzip(paste0(out.folder, "/KMZ/", name, ".kmz"), exdir=paste0(out.folder,"/PNG"))
+  file.remove(paste0(out.folder, "/PNG/", name,".kml"))
   
   #Generate thumbnails
   in.raster.co <- in.raster
-  png(paste0(in.folder, "/thumb/", name, "_thumb.png"),
+  png(paste0(out.folder, "/thumb/", name, "_thumb.png"),
       width=w, height=h, units="px", type="cairo")
   op <- par(mar = rep(0, 4), bg=NA)
   image(params$dem, axes=F, xlab="", ylab="", col=c(tr, "grey90"))
@@ -86,4 +86,3 @@ convert2PNG<-function(sp.raster, name, in.folder, col.pal, add.trans, params,w,h
   dev.off()
   unlink(list.files(tempdir()),recursive=T)
 }
-
