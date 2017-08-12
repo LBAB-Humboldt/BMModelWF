@@ -181,6 +181,7 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
     sp.name <- occ.summary[i, sp.col]
     out.sp.name <- sub(" ","_",sp.name)
     print(sp.name)
+    
     if(occ.summary$modelType[i] == "ch"){
       sp.idx <- which(orig.occs[, sp.col] == sp.name)
       sp.occs <- orig.occs[sp.idx, ]
@@ -214,11 +215,11 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
       #Write Results
       writeRaster(bc.map, paste0(wd, "/",  out.sp.name, "_bc.tif"), format="GTiff", overwrite=TRUE, NAflag=-9999)
       results.template <- initial.template
-      results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod", "validationType",
+      results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod", "thresholdType","validationType",
                             "perfStatType", "perfStatValue", "perfStatSD", "pValue",
                             "recsUsed", "consensusMethod","thresholdValue", "omission",
                             "modelLevel", "modelStatus","tifPath", "dd", "mm", "yyyy")] <-
-        c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "bc", "jackniffe", "AUC.test", mean(bc.eval$test.auc, na.rm=T),
+        c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "bc", "Continuous", "jackniffe", "AUC.test", mean(bc.eval$test.auc, na.rm=T),
           sd(bc.eval$test.auc, na.rm=T), PoolPValues(bc.eval$p.value), nrow(sp.occs),
           "all", NA, "NA",1, "Developing", paste0(sub(" ","_",sp.name), "_bc.tif"), format(Sys.Date(),"%d"),
           format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
@@ -277,11 +278,11 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
       writeRaster(mx.map, paste0(wd, "/",  out.sp.name, "_mx.tif"), format="GTiff", overwrite=TRUE, NAflag=-9999)
       best.ind<-which.max(enmeval.obj@results$Mean.AUC)
       results.template <- initial.template
-      results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod", "validationType",
+      results.template[1, c("modelID","taxID","acceptedNameUsage", "modelingMethod","thresholdType" ,"validationType",
                             "perfStatType", "perfStatValue", "perfStatSD", "pValue",
                             "recsUsed", "consensusMethod","thresholdValue", "omission",
                             "modelLevel", "modelStatus","tifPath", "dd", "mm", "yyyy")] <-
-        c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "mx", "checkerboard1", "AUC.test", enmeval.obj@results$Mean.AUC[best.ind],
+        c(paste0(prefix,"-",i),unique(sp.occs$taxID),sp.name, "mx","Continuous", "checkerboard1", "AUC.test", enmeval.obj@results$Mean.AUC[best.ind],
           sqrt(enmeval.obj@results$Var.AUC[best.ind]), NA, nrow(sp.occs),
           "all", NA, "NA",1, "Developing", paste0(sub(" ","_",sp.name), "_mx.tif"), 
           format(Sys.Date(),"%d"), format(Sys.Date(),"%m"), format(Sys.Date(),"%Y"))
