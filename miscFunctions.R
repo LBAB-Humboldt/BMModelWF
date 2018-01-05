@@ -51,7 +51,7 @@ WriteCSV <- function(occs, out.file, as.is){
 
 CreateMXArgs<-function(enmeval.obj){
   mxnt.args<- c("linear=TRUE")
-  best.ind<- which.min(enmeval.obj@results$delta.AICc)
+  best.ind<- which.max(enmeval.obj@results$Mean.AUC)
   features <- enmeval.obj@results$features[best.ind]
   betamultiplier <- enmeval.obj@results$rm[best.ind]
   if(grepl("Q", features)){

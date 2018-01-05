@@ -154,9 +154,9 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
 
   ## Define method depending on number of records
   occ.summary$modelType <- "none"
-# occ.summary$modelType[occ.summary$EnvNAFilter > 0 & occ.summary$EnvNAFilter < 5] <- "ch"
-# occ.summary$modelType[occ.summary$EnvNAFilter > 4 & occ.summary$EnvNAFilter <10] <- "bc"
-  occ.summary$modelType[occ.summary$EnvNAFilter >= 5] <- "mx"
+ # occ.summary$modelType[occ.summary$EnvNAFilter > 0 & occ.summary$EnvNAFilter < 5] <- "ch"
+ # occ.summary$modelType[occ.summary$EnvNAFilter > 4 & occ.summary$EnvNAFilter <10] <- "bc"
+  occ.summary$modelType[occ.summary$EnvNAFilter >= 10] <- "mx"
   
   #Write summary files
   write.csv(occs, paste0(wd, "/occurrences.csv"), row.names = FALSE)
@@ -265,7 +265,7 @@ bmWorkflow<-function(wd, env.dir, env.files, occ.file, sp.col, id.col, dist, n.b
       }
       bkg.covs <- extract(env.vars, bkg.coords)
       enmeval.obj <- ENMevaluate(with(sp.occs,cbind(lon,lat)), env.vars, bkg.coords, RMvalues = seq(0.5, 4, 0.5),
-                            fc = c("L", "LQ", "LQH"), method = "checkerboard2",
+                            fc = c("L", "LQ", "LQH"), method = "checkerboard1",
                             parallel=F, rasterPreds = FALSE)
       mxnt.args <- c(CreateMXArgs(enmeval.obj), mxnt.args)
       
