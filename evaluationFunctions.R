@@ -278,7 +278,7 @@ ThresholdMXEval<-function(folds, covs.pres, covs.bkg.train, covs.bkg.test, mxnt.
     } else {
       kvector <- kfold(covs.pres, folds)
     }
-    for (k in 1:length(kvector)){
+    for (k in 1:length(unique(kvector))){
       n.train <- length(which(kvector!=k))
       n.test <- length(which(kvector==k))
       mx.obj <- maxent(x=rbind(covs.pres[kvector!=k, ], covs.bkg.train),
