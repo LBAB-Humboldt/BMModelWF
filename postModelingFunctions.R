@@ -17,10 +17,10 @@
 
 Threshold2 <- function(raw.threshold, mxnt.obj, map){
   #Use all default maxent thresholds
-  tnames.long <- c("Minimum.training.presence.logistic.threshold",
-                   "X10.percentile.training.presence.logistic.threshold",
-                   "Equal.training.sensitivity.and.specificity.logistic.threshold",
-                   "Maximum.training.sensitivity.plus.specificity.logistic.threshold")
+  tnames.long <- c("Minimum.training.presence.Cloglog.threshold",
+                   "X10.percentile.training.presence.Cloglog.threshold",
+                   "Equal.training.sensitivity.and.specificity.Cloglog.threshold",
+                   "Maximum.training.sensitivity.plus.specificity.Cloglog.threshold")
   tnames <- c("min","10p","ess","mss") #thresholds: Minimum training presence,10 percentile training presence,equal specificity and sensitivity,maximum specificity and sensitivity
   
   if(is.numeric(raw.threshold)){

@@ -272,7 +272,12 @@ EvalCH <- function(occs, env.vars, buffer, proj.crs){
 ThresholdMXEval<-function(folds, covs.pres, covs.bkg.train, covs.bkg.test, mxnt.args, threshold){
     results<-data.frame(n.train=rep(NA,folds), n.test=NA, sens=NA,
                         spec=NA, tss=NA, p.value=NA, stringsAsFactors=FALSE)
-    kvector <- kfold(covs.pres, folds)
+    #Apply jackknife when the number of records is less than 10
+    if(nrow(covs.pres)<10){
+      kvector<-1:nrow(covs.pres)
+    } else {
+      kvector <- kfold(covs.pres, folds)
+    }
     for (k in 1:folds){
       n.train <- length(which(kvector!=k))
       n.test <- length(which(kvector==k))
@@ -285,13 +290,13 @@ ThresholdMXEval<-function(folds, covs.pres, covs.bkg.train, covs.bkg.test, mxnt.
       if(is.numeric(threshold)){
         t.value <- quantile(p.train, threshold/100, na.rm=T)
       } else {
-        tnames.long <- c("Minimum.training.presence.logistic.threshold",
-                         "X10.percentile.training.presence.logistic.threshold",
-                         "Equal.training.sensitivity.and.specificity.logistic.threshold",
-                         "Maximum.training.sensitivity.plus.specificity.logistic.threshold")
+        tnames.long <- c("Minimum.training.presence.Cloglog.threshold",
+                         "X10.percentile.training.presence.Cloglog.threshold",
+                         "Equal.training.sensitivity.and.specificity.Cloglog.threshold",
+                         "Maximum.training.sensitivity.plus.specificity.Cloglog.threshold")
         tnames <- c("min","10p","ess","mss") #thresholds: Minimum training presence,10 percentile training presence,equal specificity and sensitivity,maximum specificity and sensitivity
         thres.idx <- match(threshold, tnames)
-        t.value <- mxnt.obj@results[tnames.long[thres.idx], ]
+        t.value <- mx.obj@results[tnames.long[thres.idx], ]
       }
       p <- p.test >= t.value
       p.area <- sum(a.test >= t.value)/length(a.test)
